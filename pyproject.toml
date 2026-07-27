@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "loreraven"
+version = "0.1.0"
+description = "Clone a GitHub repo, embed it into Postgres (pgvector), and ask an AI about it."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+	"langchain>=0.3",
+	"langchain-openai>=0.2",
+	"langchain-text-splitters>=0.3",
+	"langchain-postgres>=0.0.12",
+	"psycopg[binary]>=3.1",
+	"gitpython>=3.1",
+	"python-dotenv>=1.0",
+]
+
+[project.scripts]
+loreraven = "loreraven.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
