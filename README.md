@@ -34,7 +34,7 @@ Built on LangChain + OpenAI, with future browser support to be able interactivel
      pgvector/pgvector:pg16
    ```
 
-   LoreRaven creates the extension and its tables automatically on first ingest.
+   LoreRaven creates the extension and its table automatically on first ingest.
 
 ## Usage
 

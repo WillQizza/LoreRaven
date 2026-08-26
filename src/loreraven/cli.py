@@ -3,7 +3,7 @@ import argparse
 from . import config, ingest, query
 
 
-def _print_answer(assistant, question, k):
+def _print_answer(assistant: query.Assistant, question: str, k: int) -> None:
 	text, sources = assistant.answer(question, k=k)
 	print(text)
 	if sources:
@@ -12,7 +12,7 @@ def _print_answer(assistant, question, k):
 			print(f"  - {source}")
 
 
-def main(argv=None):
+def main(argv: list[str] | None = None) -> None:
 	parser = argparse.ArgumentParser(
 		prog="loreraven",
 		description="Clone a GitHub repo, embed it into Postgres, and ask an AI about it.",

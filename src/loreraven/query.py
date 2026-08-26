@@ -1,8 +1,11 @@
+from typing import Any
+
+from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_postgres import PGVector
+from langchain_openai import ChatOpenAI
 
 from . import config
+from .store import open_store
 
 PROMPT = ChatPromptTemplate.from_messages([
 	(
@@ -15,7 +18,7 @@ PROMPT = ChatPromptTemplate.from_messages([
 ])
 
 
-def cite(metadata):
+def cite(metadata: dict[str, Any]) -> str:
 	"""`owner/name/Page.md` citation for a chunk, or just the page if no repo."""
 	source = metadata.get("source", "?")
 	repo = metadata.get("repo")
@@ -25,7 +28,7 @@ def cite(metadata):
 	return source
 
 
-def format_docs(docs):
+def format_docs(docs: list[Document]) -> str:
 	blocks = []
 	for doc in docs:
 		blocks.append(f"# {cite(doc.metadata)}\n{doc.page_content}")
@@ -34,17 +37,11 @@ def format_docs(docs):
 
 
 class Assistant:
-	def __init__(self):
-		embeddings = OpenAIEmbeddings(model=config.EMBED_MODEL)
-		self.store = PGVector(
-			embeddings=embeddings,
-			collection_name=config.COLLECTION,
-			connection=config.DATABASE_URL,
-			use_jsonb=True,
-		)
+	def __init__(self) -> None:
+		self.store = open_store()
 		self.llm = ChatOpenAI(model=config.CHAT_MODEL, temperature=0)
 
-	def answer(self, question, k=4):
+	def answer(self, question: str, k: int = 4) -> tuple[str, list[str]]:
 		"""Return (answer_text, sorted_source_paths) for a question."""
 		docs = self.store.similarity_search(question, k=k)
 		if not docs:
@@ -54,4 +51,4 @@ class Assistant:
 		response = self.llm.invoke(messages)
 
 		sources = sorted({cite(d.metadata) for d in docs})
-		return (response.content, sources)
+		return (response.text, sources)

@@ -6,16 +6,17 @@ load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-# postgresql+psycopg://user:pass@host:port/dbname
 DATABASE_URL = os.getenv("LORERAVEN_DATABASE_URL")
 
 CHAT_MODEL = os.getenv("LORERAVEN_CHAT_MODEL", "gpt-4o-mini")
-EMBED_MODEL = os.getenv("LORERAVEN_EMBED_MODEL", "text-embedding-3-small")
-COLLECTION = os.getenv("LORERAVEN_COLLECTION", "loreraven")
+TABLE = os.getenv("LORERAVEN_TABLE", "loreraven")
 REPO_DIR = os.getenv("LORERAVEN_REPO_DIR", ".loreraven/repo")
 
+EMBED_MODEL = "text-embedding-3-small"
+EMBED_DIM = 1536
 
-def require_env():
+
+def require_env() -> None:
 	missing = []
 	if not OPENAI_API_KEY:
 		missing.append("OPENAI_API_KEY")
