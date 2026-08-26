@@ -5,7 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
 from . import config
-from .store import open_store
+from .db import open_store
 
 PROMPT = ChatPromptTemplate.from_messages([
 	(

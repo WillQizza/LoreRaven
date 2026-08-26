@@ -5,7 +5,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_postgres import Column, PGEngine, PGVectorStore
 from sqlalchemy.exc import ProgrammingError
 
-from . import config
+from .. import config
 
 # Columns of data associated with the embeddings
 METADATA_COLUMNS = ("repo",)
