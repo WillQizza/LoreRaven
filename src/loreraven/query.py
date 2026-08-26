@@ -19,13 +19,10 @@ PROMPT = ChatPromptTemplate.from_messages([
 
 
 def cite(metadata: dict[str, Any]) -> str:
-	"""`owner/name/Page.md` citation for a chunk, or just the page if no repo."""
+	"""`owner/name/Page.md` citation for a chunk."""
 	source = metadata.get("source", "?")
 	repo = metadata.get("repo")
-	if repo:
-		return f"{repo}/{source}"
-
-	return source
+	return f"{repo}/{source}"
 
 
 def format_docs(docs: list[Document]) -> str:
