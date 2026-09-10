@@ -1,11 +1,12 @@
+from collections.abc import Iterator
 from typing import Any
 
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
-from . import config
-from .db import open_store
+from .. import config
+from ..db import open_store
 
 PROMPT = ChatPromptTemplate.from_messages([
 	(
@@ -38,9 +39,10 @@ class Assistant:
 		self.store = open_store()
 		self.llm = ChatOpenAI(model=config.CHAT_MODEL, temperature=0)
 
-	def answer(self, question: str, k: int = 4) -> tuple[str, list[str]]:
-		"""Return (answer_text, sorted_source_paths) for a question."""
-		docs = self.store.similarity_search(question, k=k)
+	def answer(self, question: str, k: int | None = None) -> tuple[str, list[str]]:
+		"""Answers a question without streaming. Used for CLI"""
+		docs_count = k if k is not None else config.TOP_K
+		docs = self.store.similarity_search(question, k=docs_count)
 		if not docs:
 			return ("No indexed content found. Have you run `ingest` yet?", [])
 
@@ -49,3 +51,21 @@ class Assistant:
 
 		sources = sorted({cite(d.metadata) for d in docs})
 		return (response.text, sources)
+
+	def stream(self, question: str, k: int | None = None) -> Iterator[tuple[str, Any]]:
+		"""Streams LLM chunks for SSE"""
+		docs_count = k if k is not None else config.TOP_K
+		docs = self.store.similarity_search(question, k=docs_count)
+		if not docs:
+			yield ("token", "No indexed content found. Have you run `ingest` yet?")
+			yield ("done", None)
+			return
+
+		yield ("sources", sorted({cite(d.metadata) for d in docs}))
+
+		messages = PROMPT.format_messages(question=question, context=format_docs(docs))
+		for chunk in self.llm.stream(messages):
+			if chunk.text:
+				yield ("token", chunk.text)
+
+		yield ("done", None)
