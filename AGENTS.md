@@ -1,0 +1,1 @@
+When working on frontend related components, see @src/frontend/AGENTS.md

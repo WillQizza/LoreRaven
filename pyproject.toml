@@ -29,11 +29,11 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["src/backend"]
 include = ["loreraven*"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests/backend"]
 markers = [
 	"integration: needs a live pgvector database (set LORERAVEN_TEST_DATABASE_URL)",
 ]
