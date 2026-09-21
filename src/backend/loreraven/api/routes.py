@@ -38,3 +38,15 @@ def chat(request: ChatRequest, assistant: Assistant = Depends(get_assistant)) ->
 			"X-Accel-Buffering": "no",
 		},
 	)
+
+@router.get("/repositories")
+def get_repositories():
+	pass
+
+@router.post("/repositories")
+def add_repository():
+	pass
+
+@router.delete("/repositories/{id}")
+def delete_repository():
+	pass
