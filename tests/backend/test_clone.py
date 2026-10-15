@@ -17,16 +17,16 @@ def test_remove_tree_deletes_directory(tmp_path: Path) -> None:
 	assert not target.exists()
 
 
-def test_clone_repo_checks_out_the_source(wiki_repo: Repo, tmp_path: Path) -> None:
+def test_clone_repo_fetches_the_source(wiki_repo: Repo, tmp_path: Path) -> None:
 	dest = tmp_path / "clone"
 
 	cloned = clone_repo(wiki_repo.working_tree_dir, dest)
 
 	assert Path(cloned.working_tree_dir) == dest
-	assert (dest / "Home.md").exists()
+	assert "Home.md" in {blob.path for blob in cloned.head.commit.tree.traverse()}
 
 
-def test_clone_repo_replaces_an_existing_checkout(wiki_repo: Repo, tmp_path: Path) -> None:
+def test_clone_repo_replaces_an_existing_clone(wiki_repo: Repo, tmp_path: Path) -> None:
 	dest = tmp_path / "clone"
 	clone_repo(wiki_repo.working_tree_dir, dest)
 	stale = dest / "stale-marker.txt"
@@ -35,4 +35,4 @@ def test_clone_repo_replaces_an_existing_checkout(wiki_repo: Repo, tmp_path: Pat
 	clone_repo(wiki_repo.working_tree_dir, dest)
 
 	assert not stale.exists()
-	assert (dest / "Home.md").exists()
+	assert (dest / ".git").exists()

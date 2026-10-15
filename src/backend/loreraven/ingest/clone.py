@@ -18,10 +18,10 @@ def remove_tree(path: Path) -> None:
 
 
 def clone_repo(repo_url: str, dest: str | Path) -> Repo:
-	"""Clones a repository"""
+	"""Clones a repository without a checkout; pages are read from the git tree."""
 
 	dest = Path(dest)
 	if dest.exists():
 		remove_tree(dest)
 	dest.parent.mkdir(parents=True, exist_ok=True)
-	return Repo.clone_from(repo_url, str(dest), depth=1)
+	return Repo.clone_from(repo_url, str(dest), depth=1, no_checkout=True)
