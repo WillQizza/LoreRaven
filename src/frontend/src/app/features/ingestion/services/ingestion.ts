@@ -1,23 +1,23 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { InjestedRepository } from '../models/repository';
+import { HttpClient } from "@angular/common/http";
+import { inject, Injectable } from "@angular/core";
+import { Observable } from "rxjs";
+import { IngestedRepository } from "../models/repository";
 
 @Injectable({
-  providedIn: 'root'
+	providedIn: "root"
 })
 export class IngestionApiService {
-  private readonly http = inject(HttpClient);
+	private readonly http = inject(HttpClient);
 
-  getRepositories(): Observable<readonly InjestedRepository[]> {
-    return this.http.get<readonly InjestedRepository[]>('/api/repositories');
-  }
+	getRepositories(): Observable<IngestedRepository[]> {
+		return this.http.get<IngestedRepository[]>("/api/repositories");
+	}
 
-  addRepository(url: string): Observable<InjestedRepository> {
-    return this.http.post<InjestedRepository>('/api/repositories', { url });
-  }
+	addRepository(url: string): Observable<IngestedRepository> {
+		return this.http.post<IngestedRepository>("/api/repositories", { url });
+	}
 
-  removeRepository(id: number): Observable<void> {
-    return this.http.delete<void>(`/api/repositories/${id}`);
-  }
+	removeRepository(id: number): Observable<void> {
+		return this.http.delete<void>(`/api/repositories/${id}`);
+	}
 }

@@ -1,0 +1,67 @@
+:host {
+	display: block;
+	max-width: 48rem;
+	margin: 0 auto;
+	padding: 1.5rem;
+}
+
+form {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+
+	label {
+		flex-basis: 100%;
+	}
+
+	input {
+		flex: 1;
+		min-width: 12rem;
+	}
+}
+
+.repositories {
+	list-style: none;
+	padding: 0;
+
+	li {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1rem;
+		padding: 0.75rem 0;
+		border-bottom: 1px solid #ccc;
+	}
+}
+
+.details {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	min-width: 0;
+}
+
+.url {
+	overflow-wrap: anywhere;
+}
+
+.status {
+	font-size: 0.875rem;
+
+	&.ready {
+		color: #1b5e20;
+	}
+
+	&.failed {
+		color: #b71c1c;
+	}
+
+	&.ingesting {
+		color: #5d4037;
+	}
+}
+
+.error {
+	color: #b71c1c;
+}

@@ -27,5 +27,5 @@ def repo_slug(repo_url: str) -> str:
 	url = url.split("://", 1)[-1].replace(":", "/")
 	parts = [p for p in url.split("/") if p]
 	if len(parts) >= 2:
-		return "/".join(parts[-2:])
-	return parts[-1] if parts else repo_url
+		return "/".join(parts[-2:]).lower()
+	return (parts[-1] if parts else repo_url).lower()

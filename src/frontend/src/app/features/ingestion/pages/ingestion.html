@@ -1,3 +1,46 @@
-<form>
-    <input type="text" [formField]="addRepositoryForm.repository" />
+<h1>Repositories</h1>
+
+<form (submit)="add($event)">
+	<label for="repository-url">GitHub repository URL</label>
+	<input
+		id="repository-url"
+		type="url"
+		placeholder="https://github.com/owner/repo"
+		[formField]="addRepositoryForm.repository"
+	/>
+	<button type="submit" [disabled]="submitting()">
+		{{ submitting() ? "Adding..." : "Ingest" }}
+	</button>
 </form>
+
+@if (errorMessage(); as message) {
+	<p class="error" role="alert">{{ message }}</p>
+}
+
+@if (loading()) {
+	<p>Loading...</p>
+} @else if (repositories().length === 0) {
+	<p>No repositories have been ingested yet.</p>
+} @else {
+	<ul class="repositories">
+		@for (repository of repositories(); track repository.id) {
+			<li>
+				<div class="details">
+					<span class="url">{{ repository.url }}</span>
+					<span class="status" [class]="repository.status">{{ repository.status }}</span>
+					@if (repository.error) {
+						<span class="error">{{ repository.error }}</span>
+					}
+				</div>
+				<button
+					type="button"
+					[disabled]="repository.status === 'ingesting'"
+					[attr.aria-label]="'Delete ' + repository.url"
+					(click)="remove(repository)"
+				>
+					Delete
+				</button>
+			</li>
+		}
+	</ul>
+}
