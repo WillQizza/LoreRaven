@@ -1,8 +1,10 @@
 from functools import cache
+from typing import Any
 
 from asyncpg.exceptions import DuplicateTableError
 from langchain_openai import OpenAIEmbeddings
 from langchain_postgres import Column, PGEngine, PGVectorStore
+from sqlalchemy import text
 from sqlalchemy.exc import ProgrammingError
 
 from .. import config
@@ -17,7 +19,7 @@ def _engine() -> PGEngine:
 	return PGEngine.from_connection_string(config.DATABASE_URL)
 
 
-def ensure_table_exists():
+def ensure_vector_table_exists():
 	"""Create the vector table if it is absent."""
 
 	try:
@@ -46,7 +48,20 @@ def open_store() -> PGVectorStore:
 	except ValueError as error:
 		# `create_sync` builds its column map from `information_schema`, where a missing
 		# table is indistinguishable from a mismatched one: both come back empty.
-		raise SystemExit(
-			f"Table {config.TABLE!r} is missing or has an unexpected schema ({error}). "
-			"Run `loreraven ingest <repo>` to build it."
+		raise RuntimeError(
+			f"Table {config.TABLE!r} is missing or has an unexpected schema ({error})."
 		) from error
+
+
+async def _execute(statement: str, params: dict[str, Any]) -> list[dict[str, Any]]:
+	async with _engine()._pool.begin() as connection:
+		result = await connection.execute(text(statement), params)
+		if not result.returns_rows:
+			return []
+
+		return [dict(row._mapping) for row in result]
+
+
+def run_sql(statement: str, **params: Any) -> list[dict[str, Any]]:
+	# Hacky way to run SQL stmts using the langchain postgres library
+	return _engine()._run_as_sync(_execute(statement, params))

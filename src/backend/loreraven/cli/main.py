@@ -1,8 +1,10 @@
 import argparse
+import logging
 
 import uvicorn
 
 from .. import config, ingest
+from ..db import ensure_schema, repositories
 from . import query
 
 
@@ -34,7 +36,6 @@ def main(argv: list[str] | None = None) -> None:
 
 	p_ingest = sub.add_parser("ingest", help="Clone a repo and build the index")
 	p_ingest.add_argument("repo", help="GitHub repo URL (or a local git path)")
-	p_ingest.add_argument("--branch", default=None, help="Branch to clone")
 
 	p_query = sub.add_parser("query", help="Ask a single question")
 	p_query.add_argument("question", help="Your question")
@@ -50,13 +51,34 @@ def main(argv: list[str] | None = None) -> None:
 
 	args = parser.parse_args(argv)
 	config.require_env()
+	logging.basicConfig(level=logging.INFO, format="%(message)s")
 
+	try:
+		_run(args)
+	except ingest.IngestError as error:
+		raise SystemExit(str(error)) from error
+
+
+def _ingest(repo: str) -> None:
+	url = ingest.normalize_wiki_url(repo)
+	slug = ingest.repo_slug(url)
+	ensure_schema()
+	if repositories.upsert_ingesting(slug, url) is None:
+		raise SystemExit(f"{slug} is already being ingested.")
+
+	result = ingest.record_ingest(slug, url)
+	print(f"Ingested {result.slug}: {result.pages} pages -> {result.chunks} chunks.")
+
+
+def _run(args: argparse.Namespace) -> None:
 	if args.command == "ingest":
-		ingest.ingest_repo(args.repo, branch=args.branch)
+		_ingest(args.repo)
 	elif args.command == "query":
+		ensure_schema()
 		assistant = query.Assistant()
 		_print_answer(assistant, args.question, args.k)
 	elif args.command == "chat":
+		ensure_schema()
 		assistant = query.Assistant()
 		print("LoreRaven chat. Type a question, or 'exit' to quit.")
 		while True:

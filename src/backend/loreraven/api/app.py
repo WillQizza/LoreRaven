@@ -1,10 +1,13 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from threading import Thread
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .. import __version__, config
+from ..db import ensure_schema, repositories
+from ..ingest import run_ingest
 from .deps import init_assistant
 from .routes import router
 
@@ -13,11 +16,14 @@ from .routes import router
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 	try:
 		config.require_env()
-		init_assistant()
 	except SystemExit as error:
-		# `require_env` and `open_store` report failures by exiting, which a server would
-		# swallow as a silent shutdown. Surface it as a real startup error instead.
 		raise RuntimeError(str(error)) from error
+
+	ensure_schema()
+	init_assistant()
+
+	for row in repositories.list_repositories(repositories.Status.INGESTING):
+		Thread(target=run_ingest, args=(row.slug, row.url), daemon=True).start()
 
 	yield
 

@@ -1,7 +1,10 @@
+import logging
 from pathlib import Path
 
 from git import Repo
 from langchain_core.documents import Document
+
+logger = logging.getLogger(__name__)
 
 
 def load_documents(repo: Repo, slug: str) -> list[Document]:
@@ -19,7 +22,7 @@ def load_documents(repo: Repo, slug: str) -> list[Document]:
 				continue
 			text = path.read_text(encoding="utf-8", errors="ignore")
 		except OSError:
-			print(f"Skipping {rel}: could not be read.")
+			logger.warning("Skipping %s: could not be read.", rel)
 			continue
 		if not text.strip():
 			continue

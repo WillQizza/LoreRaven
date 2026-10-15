@@ -4,15 +4,15 @@ from pathlib import Path
 import pytest
 from git import Repo
 
-from loreraven.ingest.clone import _remove_tree, clone_repo
+from loreraven.ingest.clone import clone_repo, remove_tree
 
 
-def test_private_remove_tree_deletes_directory(tmp_path: Path) -> None:
+def test_remove_tree_deletes_directory(tmp_path: Path) -> None:
 	target = tmp_path / "tree"
 	(target / "nested").mkdir(parents=True)
 	(target / "nested" / "file.txt").write_text("data", encoding="utf-8")
 
-	_remove_tree(target)
+	remove_tree(target)
 
 	assert not target.exists()
 
