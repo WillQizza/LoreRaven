@@ -2,13 +2,14 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from "
 import { form, FormField } from "@angular/forms/signals";
 import { Subscription } from "rxjs";
 import { ChatEvent, ChatMessage } from "../models/chat";
+import { Markdown } from "../../../shared/markdown/markdown";
 import { ChatApiService } from "../services/chat";
 
 @Component({
 	selector: "app-chat-page",
 	templateUrl: "./chat.html",
 	styleUrl: "./chat.scss",
-	imports: [FormField],
+	imports: [FormField, Markdown],
 	changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChatPage {
@@ -60,6 +61,19 @@ export class ChatPage {
 			messages.map(message => (message.streaming ? { ...message, streaming: false } : message))
 		);
 		this.busy.set(false);
+	}
+
+	protected sourceUrl(source: string): string | null {
+		const parts = source.split("/").filter(part => part.length > 0);
+		if (parts.length < 3) {
+			return null;
+		}
+
+		const [owner, repo, ...page] = parts;
+		const lastIndex = page.length - 1;
+		page[lastIndex] = page[lastIndex].replace(/\.md$/i, "");
+		const path = page.map(part => encodeURIComponent(part)).join("/");
+		return `https://github.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/wiki/${path}`;
 	}
 
 	private apply(id: number, chatEvent: ChatEvent): void {

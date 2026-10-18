@@ -6,6 +6,8 @@
 			<h2 class="author">{{ message.role === "user" ? "You" : "LoreRaven" }}</h2>
 			@if (message.streaming && message.content.length === 0) {
 				<p class="content">Thinking...</p>
+			} @else if (message.role === "assistant") {
+				<app-markdown [content]="message.content" />
 			} @else {
 				<p class="content">{{ message.content }}</p>
 			}
@@ -17,7 +19,19 @@
 					<summary>Sources ({{ message.sources.length }})</summary>
 					<ul>
 						@for (source of message.sources; track source) {
-							<li>{{ source }}</li>
+							<li>
+								@if (sourceUrl(source); as href) {
+									<a
+										[href]="href"
+										target="_blank"
+										rel="noopener noreferrer"
+										[attr.aria-label]="source"
+										>{{ source }}</a
+									>
+								} @else {
+									{{ source }}
+								}
+							</li>
 						}
 					</ul>
 				</details>
